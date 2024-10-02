@@ -1,0 +1,336 @@
+{
+  "type": "skio-plan-picker",
+  "name": "Skio Plan Picker",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Integration Guide](https://integrate.skio.com)"
+    },
+    {
+      "type": "liquid",
+      "id": "form_id",
+      "label": "Form ID",
+      "info": "This should match the ID of the add to cart form. Set to the default for Dawn themes. Accepts liquid.",
+      "default": "product-form-{{section.id}}"
+    },
+    {
+      "type": "liquid",
+      "id": "external_price_selector",
+      "label": "External Price Selector to update display price on plan change",
+      "info": "This should match the ID or class of the price element. Set to the default for Dawn themes. Accepts liquid. For multiple items, separate each by a comma.",
+      "default": ".price-item--regular"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_details",
+      "label": "Display \"How do subscriptions work?\" details element",
+      "info": "Display \"How do subscriptions work?\" details element, with the default copy / display settings. Turn this off to use a custom details element.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_without_subscription",
+      "label": "Diplay widget without subscriptions",
+      "info": "Display one time purchase if no subscriptions are available. This does not affect functionality.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_compare_price",
+      "label": "Show compare at price",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style settings",
+      "info": "Customize the plan picker to match your site's feel"
+    },
+    {
+      "type": "liquid",
+      "id": "legend_content",
+      "label": "Section title",
+      "default": "Select subscription plan"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_legend",
+      "label": "Show section title",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Widget layout",
+      "options": [
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "hidden",
+          "label": "Hidden"
+        }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "select",
+      "id": "dropdownPosition",
+      "label": "Frequency position",
+      "options": [
+        {
+          "value": "inside",
+          "label": "Inside group"
+        },
+        {
+          "value": "underneath",
+          "label": "Underneath group"
+        },
+        {
+          "value": "hidden",
+          "label": "Hidden"
+        }
+      ],
+      "default": "inside"
+    },
+    {
+      "type": "liquid",
+      "id": "additional_frequency_label",
+      "label": "Additional Frequency Label",
+      "info": "Add additional label to be shown above the Frequency selector"
+    },
+    {
+      "type": "checkbox",
+      "id": "start_onetime",
+      "label": "Default to one time purchase",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "onetime_first",
+      "label": "Display one time purchase first",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "group_border_radius",
+      "label": "Plan option border radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "group_border_width",
+      "label": "Plan option border width",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "group_border_color",
+      "label": "Plan option border color",
+      "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "group_border_selected_color",
+      "label": "Plan option selected border color",
+      "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "group_background_color",
+      "label": "Plan option background color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "selected_group_background_color",
+      "label": "Plan option selected background color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "group_text_color",
+      "label": "Plan option text color",
+      "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "group_selected_text_color",
+      "label": "Plan option selected text color",
+      "default": "#000"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_radio_selector",
+      "label": "Show radio selector",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "onetime_title",
+      "label": "One time purchase title",
+      "default": "One time purchase"
+    },
+    {
+      "type": "text",
+      "id": "subscription_title",
+      "label": "Subscription title",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "prepaid_title",
+      "label": "Prepaid title",
+      "default": "Prepaid"
+    },
+    {
+      "type": "radio",
+      "id": "discount_format",
+      "label": "Displayed Discount Format",
+      "options": [
+        {
+          "value": "percent",
+          "label": "Percent"
+        },
+        {
+          "value": "absolute",
+          "label": "Absolute"
+        }
+      ],
+      "default": "percent"
+    },
+    {
+      "type": "radio",
+      "id": "discount_style",
+      "label": "Discount Style",
+      "options": [
+        {
+          "value": "bubble",
+          "label": "Bubble"
+        },
+        {
+          "value": "text",
+          "label": "Text"
+        }
+      ],
+      "default": "bubble"
+    },
+    {
+      "type": "liquid",
+      "id": "discount_text",
+      "label": "Discount text",
+      "default": "Save [discount]",
+      "info": "Use [discount] to display the discount amount. Can also use [future_price_adjustments] to display future price adjustments from the field below"
+    },
+    {
+      "type": "color",
+      "id": "discount_color",
+      "label": "Discount Background Color",
+      "default": "#0fa573"
+    },
+    {
+      "type": "color",
+      "id": "discount_text_color",
+      "label": "Discount Text Color",
+      "default": "#fff"
+    },
+    {
+      "type": "liquid",
+      "id": "additional_subscription_content",
+      "label": "Additional Subscription Content",
+      "info": "Add additional information to be displayed under Subscription options. Works with HTML. Accepts [discount] and [future_price_adjustments] to display the discount and future price adjustments respectively."
+    },
+    {
+      "type": "select",
+      "id": "selector_type",
+      "label": "Interval selector type",
+      "options": [
+        {
+          "value": "hidden",
+          "label": "Hidden"
+        },
+        {
+          "value": "dropdown",
+          "label": "Dropdown"
+        },
+        {
+          "value": "button",
+          "label": "Button"
+        }
+      ],
+      "default": "dropdown"
+    },
+    {
+      "type": "range",
+      "id": "button_plan_selector_width",
+      "label": "Button plan selector width",
+      "min": 20,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Configuration Settings",
+      "info": "Customize the functionality of the skio plan picker"
+    },
+    {
+      "type": "text",
+      "id": "default_subscription",
+      "label": "Default selected subscription",
+      "info": "Enter the name of the subscription you want to be selected by default. Leave blank to select the first subscription. (e.g. '3 months')"
+    },
+    {
+      "type": "liquid",
+      "id": "future_price_adjustments_text",
+      "label": "Future price adjustment text",
+      "info": "Edit the text you want to display for future price adjustments. You can use [discount] and [order_count] or [order_count_ordinal] to display the discount and order count respectively. (e.g. 'Then save [discount] after order [order_count]')",
+      "default": "<small>Then [discount] off after the [order_count_ordinal] order</small>"
+    },
+    {
+      "type": "header",
+      "content": "Advanced Settings",
+      "info": "Only use the following features if you are a developer"
+    },
+    {
+      "type": "text",
+      "id": "element_name",
+      "label": "Element Name",
+      "info": "Create an element using a different name, useful when creating extensions",
+      "default": "skio-plan-picker"
+    },
+    {
+      "type": "product",
+      "id": "product_handle",
+      "label": "Product",
+      "info": "Useful on landing pages, on product pages the product is automatically detected"
+    },
+    {
+      "type": "checkbox",
+      "id": "combine_groups",
+      "label": "Combine Groups",
+      "info": "Display all plans in one group",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "combined_group_name",
+      "label": "Combined Group Name",
+      "info": "Name of the combined group. (display only)",
+      "default": "Subscription"
+    }
+  ]
+}
