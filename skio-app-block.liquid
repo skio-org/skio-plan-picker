@@ -30,6 +30,12 @@
     key='{{ block.id }}'
     options='{{ block.settings | json | escape }}'
     layout='{{ block.settings.layout }}'
+    
+    {% if settings.currency_code_enabled %}
+      moneyFormat='{{ shop.money_with_currency_format }}'
+    {% else %}
+      moneyFormat='{{ shop.money_format }}'
+    {% endif %}
 
     {% if block.settings.product_handle != null %}
       productHandle='{{ block.settings.product_handle }}'

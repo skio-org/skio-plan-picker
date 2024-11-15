@@ -17,6 +17,8 @@ export class SkioPlanPicker extends LitElement {
 
     options: { type: Object },
 
+    moneyFormat: { type: String },
+
     quantity: { type: Number },
     rules: { type: Array },
     rule: { type: Object },
@@ -319,6 +321,10 @@ export class SkioPlanPicker extends LitElement {
         outline-offset: 4px;
       }
 
+      .group-content-additional {
+        margin-top: 5px;
+      }
+
       .skio-details {
         --text-color: #333;
         --text-color-secondary: #888;
@@ -499,15 +505,6 @@ export class SkioPlanPicker extends LitElement {
 
   constructor() {
     super()
-
-    this.currency = window.Shopify.currency.active || 'USD'
-    this.language = window.Shopify.locale || 'en-US'
-    this.moneyFormatter = new Intl.NumberFormat(this.language, {
-      style: 'currency',
-      currency: this.currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
 
     // Start - Debug Variables
     this.debug = window?.Shopify?.designMode
@@ -906,6 +903,15 @@ export class SkioPlanPicker extends LitElement {
         this.variantChanged = true
       })
     }
+    
+    const $quantityInput = this.form.querySelector('[name="quantity"]')
+
+    if ($quantityInput) {
+      this.quantity = Number($quantityInput.value)
+      $quantityInput.addEventListener('input', () => {
+        this.quantity = Number($quantityInput.value)
+      })
+    }
   }
 
   detailsMouseover() {
@@ -1069,10 +1075,6 @@ export class SkioPlanPicker extends LitElement {
     return num + 'th'
   }
 
-  money(price) {
-    return this.moneyFormatter.format(price / 100.0)
-  }
-
   viable() {
     const errors = []
 
@@ -1130,9 +1132,6 @@ export class SkioPlanPicker extends LitElement {
     document.querySelectorAll(this.options?.external_price_selector).forEach(el => {
       this.selectedSellingPlan ? (el.innerHTML = this.price(this.selectedSellingPlan)) : (el.innerHTML = this.money(this.selectedVariant.price))
     })
-    document.querySelectorAll(this.options?.external_price_selector).forEach(el => {
-      this.selectedSellingPlan ? (el.innerHTML = this.price(this.selectedSellingPlan) + ' ' + this.currency) : (el.innerHTML = this.money(this.selectedVariant.price) + ' ' + this.currency)
-    })
   }
 
   additionalFrequencyLabel() {
@@ -1144,11 +1143,18 @@ export class SkioPlanPicker extends LitElement {
   additionalContentText() {
     if (!this.options?.additional_subscription_content || this.options?.additional_subscription_content == '') return
 
-    return unsafeHTML(
-      this.options?.additional_subscription_content
-        .replaceAll('[discount]', this.options?.discount_format === 'absolute' ? this.money(this.discount(this.selectedSellingPlan).absolute) : this.discount(this.selectedSellingPlan).percent + '%')
-        .replaceAll('[future_price_adjustments]', this.postCheckoutDiscountsText(this.selectedSellingPlan) || '')
-    )
+    return html`
+      <div class="group-content-additional">
+        ${unsafeHTML(
+          this.options?.additional_subscription_content
+            .replaceAll(
+              '[discount]',
+              this.options?.discount_format === 'absolute' ? this.money(this.discount(this.selectedSellingPlan).absolute) : this.discount(this.selectedSellingPlan).percent + '%'
+            )
+            .replaceAll('[future_price_adjustments]', this.postCheckoutDiscountsText(this.selectedSellingPlan) || '')
+        )}
+      </div>
+    `
   }
 
   // SECTION: Discount Functions
@@ -1240,6 +1246,74 @@ export class SkioPlanPicker extends LitElement {
 
     return discount
   }
+
+  /**
+   * Formats a number of cents into a currency string using Shopify format string.
+   *
+   * https://help.shopify.com/en/manual/international/pricing/currency-formatting#currency-formatting-options
+   *
+   * Originally from: https://gist.github.com/stewartknapman/8d8733ea58d2314c373e94114472d44c
+   *
+   * @param cents - The number of cents to format.
+   * @param formatString - The format string to use.
+   * @returns The formatted currency string.
+   */
+  money(cents, formatString = this.moneyFormat) {
+    const placeholderRegex = /{{\s*(\w+)\s*}}/
+
+    /**
+     * Formats a number of cents into a currency string using the provided
+     * precision, thousands separator, and decimal separator.
+     * @param number - The number of cents to format.
+     * @param precision - The number of decimal places to include.
+     * @param thousands - The character to use as the thousands separator.
+     * @param decimal - The character to use as the decimal separator.
+     * @returns The formatted currency string.
+     */
+    function formatWithDelimiters(number, precision = 2, thousands = ',', decimal = '.') {
+      if (isNaN(number) || number == null) {
+        return '0'
+      }
+
+      const numString = (number / 100.0).toFixed(precision)
+      const parts = numString.split('.')
+      const dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands)
+      const cents = parts[1] ? decimal + parts[1] : ''
+      return dollars + cents
+    }
+
+    return formatString.replace(placeholderRegex, (match, placeholder) => {
+      switch (placeholder) {
+        case 'amount':
+          // Ex.	1,134.65
+          return formatWithDelimiters(cents, 2)
+        case 'amount_no_decimals':
+          // Ex. 1,135
+          return formatWithDelimiters(cents, 0)
+        case 'amount_with_comma_separator':
+          // Ex. 1.134,65
+          return formatWithDelimiters(cents, 2, '.', ',')
+        case 'amount_no_decimals_with_comma_separator':
+          // Ex. 1.135
+          return formatWithDelimiters(cents, 0, '.', ',')
+        case 'amount_with_apostrophe_separator':
+          // Ex. 1'134.65
+          return formatWithDelimiters(cents, 2, "'", '.')
+        case 'amount_no_decimals_with_space_separator':
+          // Ex. 1 135
+          return formatWithDelimiters(cents, 0, ' ')
+        case 'amount_with_space_separator':
+          // 1 134,65
+          return formatWithDelimiters(cents, 2, ' ', ',')
+        case 'amount_with_period_and_space_separator':
+          // 1 134.65
+          return formatWithDelimiters(cents, 2, ' ', '.')
+        default:
+          return match
+      }
+    })
+  }
+
   // !SECTION: Discount Functions
   price(selling_plan, formatted = true) {
     if (this.rule) {

@@ -69,6 +69,34 @@ The web component powered by lit that handles the UI and state of the currently 
 
 Contains the configuration settings of the plan picker for Shopify's Theme Editor. The JSON should be pasted into the blocks array of the desired section where the plan picker has to be rendered. Usually after the `@app` element in the `blocks` array.
 
+## Events
+
+For cases when there is a need to track when the purchase option is changed and/or another frequency is selected - Skio Plan Picker dispatches `skio::update-selling-plan` event.
+
+Example:
+```html
+<!-- /snippets/skio-app-block.liquid -->
+<script>
+  (function () {
+    const $form = document.querySelector('#{{ block.settings.form_id }}');
+    const $planPicker = document.querySelector('{{ block.settings.element_name }}[key="{{ block.id }}"]');
+    $planPicker.addEventListener('skio::update-selling-plan', ({ detail }) => {
+      const { variant, sellingPlan, key } = detail;
+      const isSubscriptionSelected = !!sellingPlan;
+      if(isSubscriptionSelected) {
+        // do something when subscription option is selected
+      } else {
+        // do something when one-time option is selected
+      }
+    })
+  })()
+</script>
+```
+
+## Notable Features
+
+- Skio Plan Picker tracks the current quantity within the product form and updates the prices according to your [volume discount](https://help.skio.com/hc/en-us/articles/16802529288859-Volume-discount) rules if they are set.
+
 ### Extras
 
 ***Cart Upsell Component***
