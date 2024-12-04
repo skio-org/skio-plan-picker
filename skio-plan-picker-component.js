@@ -230,7 +230,7 @@ export class SkioPlanPicker extends LitElement {
 
       .group-title {
         width: 100%;
-        max-width: 80%;
+        max-width: 70%;
         line-height: 1.5;
       }
 
@@ -507,7 +507,7 @@ export class SkioPlanPicker extends LitElement {
     super()
 
     // Start - Debug Variables
-    this.debug = window?.Shopify?.designMode
+    this.debug = this.debug || window?.Shopify?.designMode
     this.variantChanged = false
     // End - Debug Variables
 
@@ -855,13 +855,19 @@ export class SkioPlanPicker extends LitElement {
   }
 
   eligibleItemCount(rule) {
-    if (!this.cart?.items) return this.quantity
+    const eligibleQuantity = rule?.productVariantIds.some(gid => gid.includes(this.selectedVariant.id)) ? this.quantity : 0
 
-    let cartItems = Number(
-      this.cart?.items.reduce((aggregate, item) => (rule?.productVariantIds.some(gid => gid.includes(item.id) && item.selling_plan_allocation) ? aggregate + item.quantity : aggregate), 0)
+    if (!this.cart?.items) return eligibleQuantity
+
+    const cartItems = Number(
+      this.cart?.items.reduce(
+        (aggregate, item) =>
+          rule?.productVariantIds.some(gid => gid.includes(item.id) && item.selling_plan_allocation && gid.includes(this.selectedVariant.id)) ? aggregate + item.quantity : aggregate,
+        0
+      )
     )
 
-    return cartItems + this.quantity
+    return cartItems + eligibleQuantity
   }
 
   getRule() {
@@ -902,8 +908,12 @@ export class SkioPlanPicker extends LitElement {
         this.selectedVariant = this.product.variants.find(variant => variant.id == e.target.value)
         this.variantChanged = true
       })
+      // this.form.addEventListener('change', e => {
+      //   this.selectedVariant = this.product.variants.find(variant => variant.id == this.variantInput.value)
+      //   this.variantChanged = true
+      // })
     }
-    
+
     const $quantityInput = this.form.querySelector('[name="quantity"]')
 
     if ($quantityInput) {

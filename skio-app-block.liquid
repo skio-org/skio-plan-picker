@@ -1,7 +1,8 @@
 {% comment %}
+  This block is intended to be rendered in product detail sections of OS 2.0 themes.
   Usage:
     {% when 'skio-plan-picker' %}
-          {% render 'skio-app-block', block: block, product: product %}
+      {% render 'skio-app-block', block: block, product: product %}
 {% endcomment %}
 
 {% assign skioSellingPlanGroups = product.selling_plan_groups | where: 'app_id', 'SKIO' %}

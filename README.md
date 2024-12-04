@@ -29,6 +29,22 @@ Renders the plan picker. Any Skio-specific business logic should stay here.
     {% render 'skio-app-block', block: block, product: product %}
 ```
 
+### Block (non-OS2.0 themes, Page Builders)
+
+| File | Theme destination |
+| :-------- | :------- |
+| `skio-block.liquid` | `snippets` |
+
+Unlike the `skio-app-block.liquid`, this block is independent of the theme block settings. The colors and plan picker settings are set within this file.
+
+#### Usage:
+```html
+{% render 'skio-block', product: product, product_form_id: product_form_id, debug: false %}
+```
+#### Notes:
+- If `debug` parameter is true, it will render a debugger section at the top of the plan picker.
+
+
 ### JS Module
 
 | File | Theme destination |

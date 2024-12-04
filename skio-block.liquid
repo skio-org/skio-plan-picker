@@ -1,0 +1,81 @@
+{% comment %}
+  This block is intended to be used in cases when there is no access to Shopify's theme editor.
+  Best use case is non OS 2.0 themes and/or page builder sections.
+  Usage:
+    {% render 'skio-block', product: product, product_form_id: product_form_id, debug: false %}
+{% endcomment %}
+
+
+{% comment %} 
+  Colors
+{% endcomment %}
+<style>
+  skio-plan-picker {
+    --skio-group-border-radius: 0px;
+    --skio-group-border-width: 2px;
+    --skio-group-border-color: #eee;
+    --skio-group-border-selected-color: #000;
+    --skio-group-background-color: transparent;
+    --skio-group-background-selected-color: transparent;
+    --skio-group-text-color: #000; 
+    --skio-group-text-selected-color: #000;
+    --skio-discount-color: #0fa573; 
+    --skio-discount-text-color: #fff; 
+    --skio-button-plan-selector-width: 100px;
+  }
+</style>
+
+{% comment %} 
+  Plan picker settings
+{% endcomment %}
+{% capture skio_settings %}
+  {
+    "form_id":{{ product_form_id | json }}, 
+    "external_price_selector":"#product-price",
+    "show_details":false,
+    "show_without_subscription":false,
+    "show_compare_price":false,
+    "legend_content":"Select subscription plan",
+    "show_legend":false,
+    "layout":"vertical",
+    "dropdownPosition":"inside",
+    "additional_frequency_label":null,
+    "start_onetime":true,
+    "onetime_first":true,
+    "show_radio_selector":true,
+    "onetime_title":"One-time purchase",
+    "subscription_title":"Subscribe",
+    "prepaid_title":"Prepaid",
+    "discount_format":"percent",
+    "discount_style":"bubble",
+    "discount_text":"Save [discount]",
+    "additional_subscription_content":null,
+    "selector_type":"dropdown",
+    "default_subscription":"Every 2 Months",
+    "future_price_adjustments_text":"\u003csmall\u003eThen [discount] off after the [order_count_ordinal] order\u003c\/small\u003e",
+    "product_handle":"",
+    "combine_groups":false,
+    "combined_group_name":"Subscription"
+  }
+{% endcapture %}
+<skio-plan-picker 
+  key='plan-picker-{{ product.id }}'
+  options='{{ skio_settings | strip_newlines }}'
+  layout="vertical"
+  
+  {% if settings.currency_code_enabled %}
+    moneyFormat='{{ shop.money_with_currency_format }}'
+  {% else %}
+    moneyFormat='{{ shop.money_format }}'
+  {% endif %}
+
+  product='{{ product | json | escape }}'
+  selectedVariant='{{ product.selected_or_first_available_variant | json | escape }}'
+  
+  {% if debug %}
+    debug
+  {% endif %}
+>
+  <input type='hidden' name='selling_plan' {% if product_form_id != blank %}form='{{ product_form_id }}'{% endif %}>
+</skio-plan-picker >
+<script src='{{ 'skio-plan-picker-component.js' | asset_url }}' type='module'></script>
