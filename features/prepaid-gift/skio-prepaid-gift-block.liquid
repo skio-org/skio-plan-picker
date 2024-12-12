@@ -1,0 +1,12 @@
+{% comment %}
+  Renders a component that allows customers to gift prepaid subscriptions via setting line item properties necessary for Skio. This block is intended to be rendered in product detail sections of OS 2.0 themes.
+  Usage:
+    {% when 'skio-prepaid-gift' %}
+      {% render 'skio-prepaid-gift-block', block: block, product: product %}
+{% endcomment %}
+
+<skio-prepaid-gift key='{{ block.settings.key }}' options='{{ block.settings | json | escape }}' product='{{ product | json | escape }}'>
+  <input type='hidden' name='properties[_prepaidGiftMessage]' form='{{ block.settings.form_id }}'>
+  <input type='hidden' name='properties[_prepaidGiftEmail]' form='{{ block.settings.form_id }}'>
+</skio-prepaid-gift>
+<script src='{{ 'skio-prepaid-gift-component.js' | asset_url }}' type='module'></script>

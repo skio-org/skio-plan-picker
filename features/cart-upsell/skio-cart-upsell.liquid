@@ -1,0 +1,8 @@
+{% comment %}
+  Renders a component that allows to change the line item from subscription to one-time purchase and vice-versa. Should be rendered within the cart.items loop of theme's cart.
+  Usage:
+    {% render 'skio-cart-upsell', item: item, index: forloop %}
+{% endcomment %}
+
+<skio-cart-upsell item='{{ item | json | escape }}' line='{{ index }}'></skio-cart-upsell>
+<script src="{{ 'skio-cart-upsell.js' | asset_url }}" type="module"></script>

@@ -1,0 +1,40 @@
+{
+  "type": "skio-prepaid-gift",
+  "name": "Skio Prepaid Gift",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "form_id",
+      "label": "Form ID",
+      "info": "This should match the ID of the add to cart form. Set to the default for Dawn themes. Accepts liquid.",
+      "default": "product-form-{{section.id}}"
+    },
+    {
+      "type": "liquid",
+      "id": "title",
+      "label": "Display title",
+      "info": "Accepts liquid.",
+      "default": "Gift this subscription"
+    },
+    {
+      "type": "liquid",
+      "id": "recipient_title",
+      "label": "Recipient title",
+      "info": "Accepts liquid.",
+      "default": "Gift Recipient's Email"
+    },
+    {
+      "type": "liquid",
+      "id": "message_title",
+      "label": "Message title",
+      "info": "Accepts liquid.",
+      "default": "Message (optional)"
+    },
+    {
+      "type": "liquid",
+      "id": "additional_content",
+      "label": "Additional Content",
+      "info": "Additional content to display under the widget. Accepts liquid."
+    }
+  ]
+}

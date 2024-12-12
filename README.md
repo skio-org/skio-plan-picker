@@ -26,7 +26,7 @@ Renders the plan picker. Any Skio-specific business logic should stay here.
 #### Usage:
 ```html
 {% when 'skio-plan-picker' %}
-    {% render 'skio-app-block', block: block, product: product %}
+  {% render 'skio-app-block', block: block, product: product %}
 ```
 
 ### Block (non-OS2.0 themes, Page Builders)
@@ -119,9 +119,31 @@ Example:
 
 | File | Theme destination | Notes |
 | :-------- | :------- | :------- |
-| `skio-cart-upsell.js` | `assets` | Within the `cart.items` loop | 
+| `skio-cart-upsell.liquid` | `snippets` | Within the `cart.items` loop | 
+| `skio-cart-upsell.js` | `assets` |  | 
 
-Renders a component that allows to change from subscription to one-time purchase and vice-versa.
+```html
+{%- for item in cart.items -%}
+  ...
+  {% render 'skio-cart-upsell', item: item, index: forloop.index %}
+  ...
+{%- endfor -%}
+```
+Renders a component that allows to change the line item from subscription to one-time purchase and vice-versa. Should be rendered within the cart.items loop of theme's cart.
+
+***Prepaid Gift Component***
+
+| File | Theme destination |
+| :-------- | :------- |
+| `skio-prepaid-gift-block.liquid` | `snippets` |
+| `skio-prepaid-gift-component.js` | `assets` |
+| `skio-prepaid-gift-section_schema.json` | `product.liquid blocks schema` along with the `skio-plan-picker` |
+
+```html
+{% when 'skio-prepaid-gift' %}
+  {% render 'skio-prepaid-gift-block', block: block, product: product %}
+```
+Renders a component that allows customers to gift prepaid subscriptions via setting line item properties necessary for Skio.
 
 ## Feedback
 
