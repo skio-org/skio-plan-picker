@@ -573,7 +573,7 @@ export class SkioPlanPicker extends LitElement {
                 <input
                   type="radio"
                   name="selling_plan_button"
-                  value="${selling_plan}"
+                  value="${selling_plan.id}"
                   id="selling_plan_button-${selling_plan.id}"
                   @change="${e => this.selectSellingPlan(selling_plan.id)}"
                   ?checked=${group.selected_selling_plan === selling_plan}
