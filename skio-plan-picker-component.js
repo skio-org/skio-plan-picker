@@ -28,6 +28,7 @@ export class SkioPlanPicker extends LitElement {
     selectedSellingPlanGroup: { type: Object },
     selectedSellingPlan: { type: Object },
 
+    tooltipContent: { type: String },
     disableUrl: { type: Boolean },
 
     debug: { type: Boolean },
@@ -123,7 +124,6 @@ export class SkioPlanPicker extends LitElement {
         display: flex;
         align-items: center;
         width: 100%;
-
         gap: 8px;
       }
 
@@ -169,18 +169,14 @@ export class SkioPlanPicker extends LitElement {
         align-items: center;
         text-align: right;
         gap: 4px;
-
         line-height: 1;
-
         margin-left: auto;
         vertical-align: middle;
-
         font-weight: 500;
       }
 
       .skio-price s {
         font-size: 13px;
-
         font-weight: 400;
         opacity: 0.75;
       }
@@ -196,7 +192,9 @@ export class SkioPlanPicker extends LitElement {
         opacity: 1;
         width: auto;
         max-height: 1000px;
-        transition: max-height 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition:
+          max-height 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .group-content.margin-left {
@@ -211,6 +209,7 @@ export class SkioPlanPicker extends LitElement {
 
       :host([layout='horizontal']) .group-content {
         width: 100%;
+        order: 2;
       }
 
       /* Hide frequency if not selected */
@@ -232,6 +231,7 @@ export class SkioPlanPicker extends LitElement {
         width: 100%;
         max-width: 70%;
         line-height: 1.5;
+        position: relative;
       }
 
       :host([layout='horizontal']) .group-title {
@@ -249,8 +249,42 @@ export class SkioPlanPicker extends LitElement {
         border-radius: 4px;
         font-size: 12px;
         color: var(--skio-discount-text-color, #fff);
-
         white-space: nowrap;
+      }
+
+      .skio-tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        margin-left: 5px;
+      }
+
+      .skio-tooltip svg {
+        vertical-align: middle;
+      }
+
+      .skio-tooltip-text {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--skio-tooltip-background-color, #333);
+        color: var(--skio-tooltip-text-color, #fff);
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        white-space: normal;
+        width: 200px;
+        z-index: 1000;
+        transition: opacity 0.3s ease;
+      }
+
+      .skio-tooltip:hover .skio-tooltip-text,
+      .skio-tooltip:focus-within .skio-tooltip-text {
+        visibility: visible;
+        opacity: 1;
       }
 
       .selling-plan-dropdown {
@@ -271,8 +305,11 @@ export class SkioPlanPicker extends LitElement {
         border: 1px solid #ccc;
         border-radius: 2px;
         font-size: 14px;
+        color: var(--skio-group-text-selected-color, #000);
         text-overflow: ellipsis;
         white-space: nowrap;
+        outline: none !important;
+        font-family: inherit;
       }
 
       .selling-plan-dropdown-label {
@@ -328,7 +365,6 @@ export class SkioPlanPicker extends LitElement {
       .skio-details {
         --text-color: #333;
         --text-color-secondary: #888;
-
         user-select: none;
         -webkit-user-select: none;
         margin-bottom: 20px;
@@ -354,7 +390,6 @@ export class SkioPlanPicker extends LitElement {
         align-items: center;
         gap: 10px;
         text-decoration: underline;
-
         margin-top: -40px;
         color: #000;
       }
@@ -381,7 +416,9 @@ export class SkioPlanPicker extends LitElement {
         width: fit-content;
         border-radius: 5px;
         background: white;
-        box-shadow: 0 0 5px rgb(23 24 24 / 5%), 0 1px 2px rgb(0 0 0 / 7%);
+        box-shadow:
+          0 0 5px rgb(23 24 24 / 5%),
+          0 1px 2px rgb(0 0 0 / 7%);
       }
 
       .skio-details ul {
@@ -573,7 +610,7 @@ export class SkioPlanPicker extends LitElement {
                 <input
                   type="radio"
                   name="selling_plan_button"
-                  value="${selling_plan}"
+                  value="${selling_plan.id}"
                   id="selling_plan_button-${selling_plan.id}"
                   @change="${e => this.selectSellingPlan(selling_plan.id)}"
                   ?checked=${group.selected_selling_plan === selling_plan}
@@ -708,7 +745,7 @@ export class SkioPlanPicker extends LitElement {
 
               <div class="skio-content">
                 <p>No commitment</p>
-                <small>Easy to cancel if it’s not for you</small>
+                <small>Easy to cancel if it's not for you</small>
               </div>
             </li>
           </ul>
@@ -750,6 +787,8 @@ export class SkioPlanPicker extends LitElement {
       return this.debug ? this.setupMode() : ''
     }
 
+    if (this.availableSellingPlanGroups?.length == 0 && !this.options?.show_without_subscription) return
+
     return html`
       ${this.debug ? this.setupMode() : null}
 
@@ -782,7 +821,7 @@ export class SkioPlanPicker extends LitElement {
                       ${this.options?.show_compare_price && this.selectedVariant?.compare_at_price > this.selectedVariant.price
                         ? html`<s aria-hidden="true">${this.money(this.selectedVariant.compare_at_price)}</s>`
                         : ''}
-                      ${this.money(this.selectedVariant.price)}
+                      ${this.money(this.selectedVariant.price)} ${this.options?.show_unit_price ? this.unitPriceTemplate() : ''}
                     </div>
                   </div>
                 </label>
@@ -811,11 +850,17 @@ export class SkioPlanPicker extends LitElement {
                         ${group.name !== 'Prepaid' && this.options?.subscription_title
                           ? this.options?.subscription_title
                           : group.name == 'Prepaid' && this.options?.prepaid_title
-                          ? this.options?.prepaid_title
-                          : group.name}
+                            ? this.options?.prepaid_title
+                            : group.name}
                         ${this.discountText(group.selected_selling_plan)
                           ? html` <span class="savings ${this.options?.discount_style}"> ${this.discountText(group.selected_selling_plan)} </span> `
                           : html``}
+                        ${this.tooltipContent
+                          ? html`<span class="skio-tooltip" tabindex="0" aria-describedby="skio-tooltip-${this.key}-${index}">
+                              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM7 4h2v2H7V4zm0 3h2v5H7V7z" /></svg>
+                              <span id="skio-tooltip-${this.key}-${index}" class="skio-tooltip-text" role="tooltip">${this.tooltipContent}</span>
+                            </span>`
+                          : ''}
                       </div>
 
                       <div class="skio-price" aria-live="polite">
@@ -823,7 +868,7 @@ export class SkioPlanPicker extends LitElement {
                         (this.selectedVariant?.compare_at_price > this.selectedVariant.price || this.selectedVariant.price > this.price(group.selected_selling_plan, false))
                           ? html`<s aria-hidden="true">${this.money(this.selectedVariant.compare_at_price ? this.selectedVariant.compare_at_price : this.selectedVariant.price)}</s>`
                           : ''}
-                        ${this.price(group.selected_selling_plan)}
+                        ${this.price(group.selected_selling_plan)} ${this.options?.show_unit_price ? this.unitPriceTemplate(group.selected_selling_plan) : ''}
                       </div>
                     </div>
 
@@ -877,7 +922,7 @@ export class SkioPlanPicker extends LitElement {
     }
 
     this.rules.forEach((rule, index) => {
-      if (rule.code && largestMinQuantity.value < rule.minQuantityToDiscount) {
+      if (largestMinQuantity.value < rule.minQuantityToDiscount) {
         if (rule.minQuantityToDiscount <= this.eligibleItemCount(rule)) {
           largestMinQuantity.value = rule.minQuantityToDiscount
           largestMinQuantity.index = index
@@ -895,13 +940,39 @@ export class SkioPlanPicker extends LitElement {
   }
 
   bindFormEvents() {
-    this.form = document.querySelector(`#${this.options?.form_id}`) || this.closest('form[action*="/cart/add"]')
+    // First try to find form by specified form_id
+    this.form = document.querySelector(`#${this.options?.form_id}`)
+
+    // If no form found by ID, search through parents and page
+    if (!this.form) {
+      this.form = this.findProductForm()
+    }
 
     if (!this.form) {
+      this.error('No valid product form found')
       return
     }
 
+    // Add debug styling if debug mode is enabled
+    if (this.debug) {
+      this.form.style.borderStyle = 'solid'
+      this.form.style.borderWidth = '4px'
+      this.form.style.borderImage = 'repeating-linear-gradient(-55deg,#000,#000 20px,#ffb101 20px,#ffb101 40px)10'
+    }
+
+    // Ensure form has an ID
+    if (!this.form.getAttribute('id')) {
+      this.form.setAttribute('id', `skio-form-${this.product.id}`)
+    }
+
+    // Set form attribute on selling plan input
+    const sellingPlanInput = this.querySelector('input[name="selling_plan"]')
+    if (sellingPlanInput) {
+      sellingPlanInput.setAttribute('form', this.form.getAttribute('id'))
+    }
+
     this.variantInput = this.form.querySelector('[name="id"]')
+    if (!this.variantInput) this.variantInput = document.querySelector(`[name="id"][form="${this.options?.form_id}"]`)
 
     if (this.variantInput) {
       this.variantInput.addEventListener('change', e => {
@@ -922,6 +993,70 @@ export class SkioPlanPicker extends LitElement {
         this.quantity = Number($quantityInput.value)
       })
     }
+
+    let skio = this
+    // Example variantChanged event dispatch:
+    // document.dispatchEvent( new CustomEvent("variantChanged", { detail: { variantId: variant.id } }) );
+    document.addEventListener('variantChanged', function (e) {
+      let variantId = e.detail.variantId
+      let variant = skio.product.variants.find(x => x.id == variantId)
+      if (variant) skio.selectedVariant = variant
+      else skio.log('Unable to find variant with id: ', variantId)
+      this.variantChanged = true
+      skio.requestUpdate()
+    })
+  }
+
+  findProductForm() {
+    // First try finding form through parent elements
+    const formFromParent = this.findFormThroughParents()
+    if (formFromParent) return formFromParent
+
+    // If no form found through parents, look for any valid product forms on page
+    const allProductForms = this.getAllProductForms()
+    return allProductForms[0] || null
+  }
+
+  findFormThroughParents() {
+    let currentElement = this
+    let depth = 0
+    const maxDepth = 5
+
+    while (currentElement.parentElement && depth < maxDepth) {
+      const forms = Array.from(currentElement.querySelectorAll('form'))
+      const validForm = forms.find(form => this.isValidProductForm(form))
+
+      if (validForm) return validForm
+
+      currentElement = currentElement.parentElement
+      depth++
+    }
+
+    return null
+  }
+
+  getAllProductForms() {
+    return Array.from(document.forms).filter(form => {
+      const hasVariantId = this.getVariantId(form)
+      return this.isValidProductForm(form) && hasVariantId
+    })
+  }
+
+  isValidProductForm(form) {
+    const hasCartAction = form.getAttribute('action')?.includes('/cart/add')
+    const hasSubmitButton = !!form.querySelector('button, [type="submit"]')
+    return hasCartAction && hasSubmitButton
+  }
+
+  getVariantId(form) {
+    // Try getting ID from FormData first
+    const formData = new FormData(form)
+    const idFromFormData = formData.get('id')
+    if (idFromFormData) return Number(idFromFormData)
+
+    // Fallback to finding input element
+    const idInput = form.querySelector('[name="id"]')
+    return idInput ? Number(idInput.value) : null
   }
 
   detailsMouseover() {
@@ -1047,6 +1182,7 @@ export class SkioPlanPicker extends LitElement {
     }
 
     this.updateExternalElements()
+    this.updateTooltipContent()
   }
 
   updateExternalElements() {
@@ -1170,6 +1306,7 @@ export class SkioPlanPicker extends LitElement {
   // SECTION: Discount Functions
   // Calculates discount based on selling_plan.price_adjustments, returns { percent, amount } of selling plan discount
   discountText(selling_plan) {
+    if (!this.options?.discount_text || this.options?.discount_text == '') return
     const discount = this.discount(selling_plan)
     const hasInvalidDiscount = Object.values(discount).some(value => value === 0 || value === Infinity || value.toString().includes('-'))
 
@@ -1328,11 +1465,25 @@ export class SkioPlanPicker extends LitElement {
   price(selling_plan, formatted = true) {
     if (this.rule) {
       return formatted
-        ? this.money(this.selectedVariant.price - this.discount(selling_plan).amount - this.selectedVariant.price * (this.rule.discountAmount / 100))
-        : this.selectedVariant.price - this.discount(selling_plan).amount - this.selectedVariant.price * (this.rule.discountAmount / 100)
+        ? this.money(this.selectedVariant.price - this.discount(selling_plan).amount - (this.selectedVariant.price - this.discount(selling_plan).amount) * (this.rule.discountAmount / 100))
+        : this.selectedVariant.price - this.discount(selling_plan).amount - (this.selectedVariant.price - this.discount(selling_plan).amount) * (this.rule.discountAmount / 100)
     }
 
     return formatted ? this.money(this.selectedVariant.price - this.discount(selling_plan).amount) : this.selectedVariant.price - this.discount(selling_plan).amount
+  }
+
+  unitPriceTemplate(selling_plan = null) {
+    const unitPrice = this.selectedVariant?.unit_price
+    const measurement = this.selectedVariant?.unit_price_measurement
+    if (!unitPrice || !measurement) return ''
+
+    let displayPrice = unitPrice
+    if (selling_plan) {
+      const subscriptionPrice = this.price(selling_plan, false)
+      displayPrice = Math.round((unitPrice * subscriptionPrice) / this.selectedVariant.price)
+    }
+
+    return html`<div class="skio-unit-price">${this.money(displayPrice)}/${measurement.reference_unit}</div>`
   }
 
   // Updates element data to be registered by forms
@@ -1409,6 +1560,29 @@ export class SkioPlanPicker extends LitElement {
         return product
       })
   }
+
+  replacePlaceholders(template, sellingPlan = this.selectedSellingPlan) {
+    if (!template) return ''
+
+    const discount = this.discount(sellingPlan)
+    const discountText = this.options?.discount_format === 'absolute' ? this.money(discount.absolute) : discount.percent + '%'
+
+    const futureDiscounts = this.postCheckoutDiscountsText(sellingPlan) || []
+    const futureDiscountsText = futureDiscounts.join(', ')
+
+    return template.replaceAll('[discount]', discountText).replaceAll('[future_price_adjustments]', futureDiscountsText)
+  }
+
+  updateTooltipContent() {
+    const template = this.options?.tooltip_content || ''
+    let plan = this.selectedSellingPlan
+    if (!plan && this.availableSellingPlanGroups?.length) {
+      const firstGroup = this.availableSellingPlanGroups[0]
+      plan = firstGroup.selected_selling_plan || firstGroup.selling_plans?.[0] || null
+    }
+    this.tooltipContent = this.replacePlaceholders(template, plan)
+  }
+
   // !SECTION: Additional Functionality
 }
 

@@ -210,6 +210,10 @@ export class SkioPrepaidGift extends LitElement {
     this.message = ''
 
     this.sellingPlanInput = null
+    this._boundSellingPlanInput = null
+    this._onSellingPlanChange = e => {
+      this.isPrepaidSelected = this.isPrepaidSellingPlan(e.target.value)
+    }
 
     this.debug = window?.Shopify?.designMode
   }
@@ -223,25 +227,113 @@ export class SkioPrepaidGift extends LitElement {
       this.prepaidSelectedChange = true
     }
 
-    if (changed.has('options')) {
-      if (this.options.form_id) {
-        this.form = document.querySelector(`#${this.options.form_id}`) || this.closest('form[action*="/cart/add"]')
-
-        if (this.form) {
-          this.sellingPlanInput = document.querySelector(`[name="selling_plan"][form="${this.options.form_id}"]`)
-
-          if (this.sellingPlanInput) {
-            this.isPrepaidSelected = this.isPrepaidSellingPlan(this.sellingPlanInput.value)
-
-            this.sellingPlanInput.addEventListener('change', e => {
-              this.isPrepaidSelected = this.isPrepaidSellingPlan(e.target.value)
-            })
-          }
-        }
-      }
+    if (changed.has('options') || changed.has('product')) {
+      this.bindFormEvents()
     }
 
     this.updateForm()
+  }
+
+  bindFormEvents() {
+    this.form = document.querySelector(`#${this.options?.form_id}`)
+
+    if (!this.form) {
+      this.form = this.findProductForm()
+    }
+
+    if (!this.form) {
+      this.sellingPlanInput = null
+      if (this._boundSellingPlanInput) {
+        this._boundSellingPlanInput.removeEventListener('change', this._onSellingPlanChange)
+        this._boundSellingPlanInput = null
+      }
+      return
+    }
+
+    if (this.debug) {
+      this.form.style.borderStyle = 'solid'
+      this.form.style.borderWidth = '4px'
+      this.form.style.borderImage = 'repeating-linear-gradient(-55deg,#000,#000 20px,#ffb101 20px,#ffb101 40px)10'
+    }
+
+    if (!this.form.getAttribute('id')) {
+      this.form.setAttribute('id', `skio-form-${this.product.id}`)
+    }
+
+    const formIdAttr = this.form.getAttribute('id')
+
+    let sellingPlanInput = this.form.querySelector('[name="selling_plan"]')
+    if (!sellingPlanInput) {
+      sellingPlanInput = document.querySelector(`[name="selling_plan"][form="${formIdAttr}"]`)
+    }
+    if (!sellingPlanInput && this.options?.form_id) {
+      sellingPlanInput = document.querySelector(`[name="selling_plan"][form="${this.options.form_id}"]`)
+    }
+
+    if (this._boundSellingPlanInput && this._boundSellingPlanInput !== sellingPlanInput) {
+      this._boundSellingPlanInput.removeEventListener('change', this._onSellingPlanChange)
+      this._boundSellingPlanInput = null
+    }
+
+    this.sellingPlanInput = sellingPlanInput
+
+    if (this.sellingPlanInput) {
+      this.isPrepaidSelected = this.isPrepaidSellingPlan(this.sellingPlanInput.value)
+      if (this._boundSellingPlanInput !== this.sellingPlanInput) {
+        this.sellingPlanInput.addEventListener('change', this._onSellingPlanChange)
+        this._boundSellingPlanInput = this.sellingPlanInput
+      }
+    } else {
+      this.isPrepaidSelected = false
+    }
+  }
+
+  findProductForm() {
+    const formFromParent = this.findFormThroughParents()
+    if (formFromParent) return formFromParent
+
+    const allProductForms = this.getAllProductForms()
+    return allProductForms[0] || null
+  }
+
+  findFormThroughParents() {
+    let currentElement = this
+    let depth = 0
+    const maxDepth = 5
+
+    while (currentElement.parentElement && depth < maxDepth) {
+      const forms = Array.from(currentElement.querySelectorAll('form'))
+      const validForm = forms.find(form => this.isValidProductForm(form))
+
+      if (validForm) return validForm
+
+      currentElement = currentElement.parentElement
+      depth++
+    }
+
+    return null
+  }
+
+  getAllProductForms() {
+    return Array.from(document.forms).filter(form => {
+      const hasVariantId = this.getVariantId(form)
+      return this.isValidProductForm(form) && hasVariantId
+    })
+  }
+
+  isValidProductForm(form) {
+    const hasCartAction = form.getAttribute('action')?.includes('/cart/add')
+    const hasSubmitButton = !!form.querySelector('button, [type="submit"]')
+    return hasCartAction && hasSubmitButton
+  }
+
+  getVariantId(form) {
+    const formData = new FormData(form)
+    const idFromFormData = formData.get('id')
+    if (idFromFormData) return Number(idFromFormData)
+
+    const idInput = form.querySelector('[name="id"]')
+    return idInput ? Number(idInput.value) : null
   }
 
   updateForm() {

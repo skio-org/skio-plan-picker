@@ -1,5 +1,60 @@
+{% comment %}
+  This block is intended to be used with Horizon style themes. 
+  Add this file to the Blocks folder of the Shopify theme.
+  Save file name as 'skio-app-block.liquid.
+  No need for the underscore (_) prefix.
+{% endcomment %}
+
+{% assign skioSellingPlanGroups = product.selling_plan_groups | where: 'app_id', 'SKIO' %}
+{% assign skioRender = false %}
+{% if block.settings.product_handle != null or block.settings.product_handle == null and skioSellingPlanGroups.size > 0 and product.available %}
+  {% assign skioRender = true %}
+{% endif %}
+{% if skioRender %}
+  <style>
+    skio-plan-picker {
+      --skio-group-border-radius: {{ block.settings.group_border_radius }}px;
+      --skio-group-border-width: {{ block.settings.group_border_width }}px;
+      --skio-group-border-color: {{ block.settings.group_border_color }};
+      --skio-group-border-selected-color: {{ block.settings.group_border_selected_color }};
+      --skio-group-background-color: {{ block.settings.group_background_color }};
+      --skio-group-background-selected-color: {{ block.settings.selected_group_background_color }};
+      --skio-group-text-color: {{ block.settings.group_text_color }};
+      --skio-group-text-selected-color: {{ block.settings.group_selected_text_color }};
+      --skio-discount-color: {{ block.settings.discount_color }};
+      --skio-discount-text-color: {{ block.settings.discount_text_color }};
+      --skio-button-plan-selector-width: {{ block.settings.button_plan_selector_width }};
+      --skio-tooltip-background-color: {{ block.settings.tooltip_background_color }};
+      --skio-tooltip-text-color: {{ block.settings.tooltip_text_color }};
+    }
+  </style>
+
+  <{{ block.settings.element_name }}
+    key='{{ block.id }}'
+    options='{{ block.settings | json | escape }}'
+    layout='{{ block.settings.layout }}'
+    
+    {% if settings.currency_code_enabled %}
+      moneyFormat='{{ shop.money_with_currency_format | strip_html }}'
+    {% else %}
+      moneyFormat='{{ shop.money_format | strip_html }}'
+    {% endif %}
+
+    {% if block.settings.product_handle != null %}
+      productHandle='{{ block.settings.product_handle }}'
+    {% else %}
+      product='{{ product | json | escape }}'
+      selectedVariant='{{ product.selected_or_first_available_variant | json | escape }}'
+    {% endif %}
+  >
+    <input type='hidden' name='selling_plan' form='{{ block.settings.form_id }}'>
+  </{{ block.settings.element_name }}>
+
+  <script src='{{ 'skio-plan-picker-component.js' | asset_url }}' type='module'></script>
+{% endif %}
+
+{% schema %}
 {
-  "type": "skio-plan-picker",
   "name": "Skio Plan Picker",
   "settings": [
     {
@@ -37,12 +92,6 @@
       "type": "checkbox",
       "id": "show_compare_price",
       "label": "Show compare at price",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_unit_price",
-      "label": "Show unit price",
       "default": true
     },
     {
@@ -365,5 +414,12 @@
       "info": "Name of the combined group. (display only)",
       "default": "Subscription"
     }
+  ],
+  "presets": [
+    {
+        "name": "Skio Plan Picker",
+        "category": "Products"
+    }
   ]
 }
+{% endschema %}
