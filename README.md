@@ -108,7 +108,7 @@ Example:
   })()
 </script>
 ```
-### Horizon Theme Integration
+## Horizon Theme Integration
 
 Horizon-based themes use theme blocks and Horizon's own `ThemeEvents` system for variant changes, rather than the `change` listener used for Dawn. After adding `skio-plan-picker-component.js` to the theme's `assets` folder, make the following two edits to it.
 
