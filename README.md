@@ -108,6 +108,47 @@ Example:
   })()
 </script>
 ```
+### Horizon Theme Integration
+
+Horizon-based themes use theme blocks and Horizon's own `ThemeEvents` system for variant changes, rather than the `change` listener used for Dawn. After adding `skio-plan-picker-component.js` to the theme's `assets` folder, make the following two edits to it.
+
+#### 1. Import Horizon theme events
+
+At the top of the file, add:
+
+```js
+import { ThemeEvents, VariantSelectedEvent, VariantUpdateEvent, SlideshowSelectEvent } from '@theme/events'
+```
+
+#### 2. Swap the variant-change listener in `bindFormEvents`
+
+Replace:
+
+```js
+if (this.variantInput) {
+  this.variantInput.addEventListener('change', e => {
+    this.selectedVariant = this.product.variants.find(variant => variant.id == e.target.value)
+    this.variantChanged = true
+  })
+  // this.form.addEventListener('change', e => {
+  //   this.selectedVariant = this.product.variants.find(variant => variant.id == this.variantInput.value)
+  //   this.variantChanged = true
+  // })
+}
+```
+
+With Horizon-specific variant change detection:
+
+```js
+if (this.variantInput) {
+  const target = this.closest('.shopify-section, dialog, product-card');
+  target?.addEventListener(ThemeEvents.variantUpdate, (e) => {
+    console.log('[SKIO] TARGET VARIANT UPDATE EVENT EMITTED');
+    this.selectedVariant = this.product.variants.find(variant => variant.id == e.detail.resource.id);
+    this.variantChanged = true;
+  });
+}
+```
 
 ## Notable Features
 
